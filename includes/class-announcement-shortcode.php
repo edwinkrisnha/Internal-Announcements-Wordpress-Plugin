@@ -33,19 +33,6 @@ class Announcement_Shortcode {
 			array(),
 			IA_VERSION
 		);
-
-		wp_enqueue_script(
-			'internal-announcements',
-			IA_PLUGIN_URL . 'assets/js/announcements.js',
-			array(),
-			IA_VERSION,
-			true // load in footer.
-		);
-
-		wp_localize_script( 'internal-announcements', 'iaData', array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'ia_mark_read' ),
-		) );
 	}
 
 	// -----------------------------------------------------------------------
@@ -58,6 +45,7 @@ class Announcement_Shortcode {
 	 * Attributes:
 	 *   limit    (int)    Max non-pinned posts to show. Default 10.
 	 *   category (string) Taxonomy slug to filter by. Default '' (all).
+	 *   new_days (int)    Posts published within this many days get a "New" badge. Default 7.
 	 */
 	public function render( array $atts ): string {
 		if ( ! is_user_logged_in() ) {
@@ -70,14 +58,16 @@ class Announcement_Shortcode {
 			array(
 				'limit'    => 10,
 				'category' => '',
+				'new_days' => 7,
 			),
 			$atts,
 			'announcements'
 		);
 
-		$limit    = max( 1, (int) $atts['limit'] );
-		$category = sanitize_text_field( $atts['category'] );
-		$user_id  = get_current_user_id();
+		$limit        = max( 1, (int) $atts['limit'] );
+		$category     = sanitize_text_field( $atts['category'] );
+		$new_days     = max( 0, (int) $atts['new_days'] );
+		$new_after_ts = $new_days > 0 ? strtotime( "-{$new_days} days" ) : false;
 
 		// Optional taxonomy filter.
 		$tax_query = array();
@@ -92,7 +82,7 @@ class Announcement_Shortcode {
 		$base_args = array(
 			'post_type'              => 'announcement',
 			'post_status'            => 'publish',
-			'no_found_rows'          => true, // skip SQL_CALC_FOUND_ROWS — we don't paginate.
+			'no_found_rows'          => true,
 			'update_post_term_cache' => true,
 			'update_post_meta_cache' => true,
 		);
@@ -101,7 +91,7 @@ class Announcement_Shortcode {
 			$base_args['tax_query'] = $tax_query;
 		}
 
-		// --- Query 1: pinned (always show all pinned, no limit) ---------------
+		// --- Query 1: pinned (always show all, no limit) ----------------------
 		$pinned_query = new WP_Query( array_merge( $base_args, array(
 			'posts_per_page' => -1,
 			'meta_query'     => array(
@@ -135,16 +125,7 @@ class Announcement_Shortcode {
 			'order'   => 'DESC',
 		) ) );
 
-		$posts    = array_merge( $pinned_query->posts, $recent_query->posts );
-		$read_ids = Announcement_Read_Tracker::get_read_post_ids( $user_id );
-
-		// Count unread within this specific feed result (respects limit + category).
-		$unread_count = 0;
-		foreach ( $posts as $p ) {
-			if ( ! in_array( $p->ID, $read_ids, true ) ) {
-				$unread_count++;
-			}
-		}
+		$posts = array_merge( $pinned_query->posts, $recent_query->posts );
 
 		ob_start();
 		include IA_PLUGIN_DIR . 'templates/announcements-feed.php';

@@ -7,10 +7,9 @@ A WordPress plugin for company intranet announcements / news feeds.
 - **Custom post type** `announcement` with full WordPress admin UI and Gutenberg editor.
 - **Categories** — built-in `announcement_category` taxonomy, pre-seeded with **HR**, **IT**, and **General**.
 - **Pinning** — pin any announcement to the top of the feed via a sidebar checkbox; pinned posts always appear first, regardless of date.
-- **Per-user read tracking** — stored in a dedicated `wp_announcement_reads` table; a single bulk query prevents N+1 on every page load.
+- **"New" badge** — posts published within the last 7 days (configurable) are automatically labelled **New**; no database tracking required.
 - **Shortcode** `[announcements]` — drop it on any page to render the feed.
-- **Security** — every AJAX call is protected by both a WP nonce (`check_ajax_referer`) and a logged-in check.
-- **Lean asset loading** — CSS and JS are only enqueued on pages that contain the shortcode.
+- **Lean asset loading** — CSS is only enqueued on pages that contain the shortcode.
 
 ## Requirements
 
@@ -35,10 +34,11 @@ A WordPress plugin for company intranet announcements / news feeds.
 
 Optional attributes:
 
-| Attribute  | Default | Description                                         |
-|------------|---------|-----------------------------------------------------|
-| `limit`    | `10`    | Maximum number of non-pinned posts to display.      |
-| `category` | _(all)_ | Filter by category slug, e.g. `hr`, `it`, `general`.|
+| Attribute  | Default | Description                                                           |
+|------------|---------|-----------------------------------------------------------------------|
+| `limit`    | `10`    | Maximum number of non-pinned posts to display.                        |
+| `category` | _(all)_ | Filter by category slug, e.g. `hr`, `it`, `general`.                 |
+| `new_days` | `7`     | Posts published within this many days receive a **New** badge. Set to `0` to disable. |
 
 Examples:
 
@@ -46,6 +46,8 @@ Examples:
 [announcements limit="5"]
 [announcements category="hr"]
 [announcements limit="20" category="it"]
+[announcements new_days="14"]
+[announcements new_days="0"]
 ```
 
 ### Publishing an Announcement
@@ -62,19 +64,7 @@ Go to **Announcements → Categories** to add, edit, or remove categories.
 
 ## Database
 
-One custom table is created on activation:
-
-```sql
-wp_announcement_reads (
-    id      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
-    post_id BIGINT UNSIGNED NOT NULL,
-    read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY user_post (user_id, post_id)
-)
-```
-
-> **Note:** The table is **not dropped on deactivation** — read history is preserved. To fully remove the data, delete the table manually after uninstalling the plugin.
+This plugin creates **no custom database tables**. All data is stored in standard WordPress tables (`wp_posts`, `wp_postmeta`, `wp_terms`).
 
 ## Changelog
 

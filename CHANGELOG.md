@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-02-24
+
+### Changed
+
+- Replaced per-user read tracking (custom DB table + AJAX) with a date-based **"New" badge**.
+  Posts published within the last `new_days` days (default: 7) are automatically labelled **New** — no database writes, no JavaScript required.
+- Removed `wp_announcement_reads` table, `Announcement_Read_Tracker` class, `Announcement_Ajax` class, and the mark-as-read JS.
+- Added `new_days` shortcode attribute to control the badge threshold (set to `0` to disable).
+- CSS: removed read/unread state styles; added `.ia-new-badge` styles.
+- Plugin no longer loads any JavaScript on the frontend.
+
+---
+
 ## [1.0.0] — 2026-02-24
 
 ### Added

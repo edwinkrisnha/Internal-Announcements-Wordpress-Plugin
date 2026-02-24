@@ -9,17 +9,6 @@
 	font-family: inherit;
 }
 
-/* Unread summary banner */
-.ia-unread-summary {
-	background: #eaf4fb;
-	border-left: 4px solid #2271b1;
-	padding: 10px 14px;
-	border-radius: 3px;
-	margin-bottom: 24px;
-	font-weight: 600;
-	color: #1d2327;
-}
-
 /* Empty state */
 .ia-no-announcements {
 	color: #757575;
@@ -52,8 +41,8 @@
 	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Unread: accent left border + subtle shadow */
-.ia-announcement.ia-unread {
+/* New posts: accent left border */
+.ia-announcement.ia-is-new {
 	border-left: 4px solid #2271b1;
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
@@ -86,14 +75,16 @@
 	letter-spacing: 0.05em;
 }
 
-/* Unread blue dot */
-.ia-unread-dot {
-	display: inline-block;
-	width: 8px;
-	height: 8px;
+/* "New" badge */
+.ia-new-badge {
 	background: #2271b1;
-	border-radius: 50%;
-	flex-shrink: 0;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 2px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
 }
 
 /* Category label */
@@ -122,38 +113,4 @@
 	font-weight: 600;
 	line-height: 1.4;
 	color: #1d2327;
-}
-
-/* =============================================================================
-   Footer actions
-   ============================================================================= */
-.ia-mark-read-btn {
-	display: inline-block;
-	margin-top: 16px;
-	padding: 6px 14px;
-	background: transparent;
-	border: 1px solid #2271b1;
-	border-radius: 3px;
-	color: #2271b1;
-	font-size: 13px;
-	line-height: 1.5;
-	cursor: pointer;
-	transition: background 0.15s ease, color 0.15s ease;
-}
-
-.ia-mark-read-btn:hover:not(:disabled) {
-	background: #2271b1;
-	color: #fff;
-}
-
-.ia-mark-read-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.ia-read-label {
-	display: inline-block;
-	margin-top: 16px;
-	color: #9ca3af;
-	font-size: 13px;
 }

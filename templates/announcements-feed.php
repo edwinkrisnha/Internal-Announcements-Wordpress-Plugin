@@ -5,8 +5,8 @@
  * Variables provided by Announcement_Shortcode::render():
  *
  *   @var WP_Post[] $posts         Merged array — pinned first, then recent.
- *   @var int[]     $read_ids      Post IDs already read by the current user.
- *   @var int       $unread_count  Number of unread posts in this feed result.
+ *   @var int       $new_days      Posts newer than this many days get a "New" badge.
+ *   @var int|false $new_after_ts  Unix timestamp threshold, or false if new_days = 0.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,22 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div class="ia-announcements" id="ia-announcements">
-
-	<?php if ( $unread_count > 0 ) : ?>
-		<p class="ia-unread-summary">
-			<?php
-			printf(
-				esc_html( _n(
-					'You have %d unread announcement.',
-					'You have %d unread announcements.',
-					$unread_count,
-					'internal-announcements'
-				) ),
-				$unread_count
-			);
-			?>
-		</p>
-	<?php endif; ?>
 
 	<?php if ( empty( $posts ) ) : ?>
 		<p class="ia-no-announcements">
@@ -40,14 +24,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<ul class="ia-announcements-list">
 			<?php
 			foreach ( $posts as $announcement ) :
-				$is_read   = in_array( $announcement->ID, $read_ids, true );
 				$is_pinned = (bool) get_post_meta( $announcement->ID, '_is_pinned', true );
+				$is_new    = $new_after_ts && ( strtotime( $announcement->post_date ) >= $new_after_ts );
 				$terms     = get_the_terms( $announcement->ID, 'announcement_category' );
 
 				$item_classes = array_filter( array(
 					'ia-announcement',
-					$is_read   ? 'ia-read'   : 'ia-unread',
 					$is_pinned ? 'ia-pinned' : '',
+					$is_new    ? 'ia-is-new' : '',
 				) );
 			?>
 			<li
@@ -63,12 +47,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</span>
 					<?php endif; ?>
 
-					<?php if ( ! $is_read ) : ?>
-						<span
-							class="ia-unread-dot"
-							title="<?php esc_attr_e( 'Unread', 'internal-announcements' ); ?>"
-							aria-label="<?php esc_attr_e( 'Unread', 'internal-announcements' ); ?>"
-						></span>
+					<?php if ( $is_new ) : ?>
+						<span class="ia-new-badge">
+							<?php esc_html_e( 'New', 'internal-announcements' ); ?>
+						</span>
 					<?php endif; ?>
 
 					<?php if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) : ?>
@@ -93,7 +75,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<!-- Body — rendered through the_content filters (shortcodes, embeds, etc.) -->
 				<?php
-				// Set up post data so content filters (e.g. Gutenberg blocks) work correctly.
 				global $post;
 				$post = $announcement; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				setup_postdata( $post );
@@ -102,21 +83,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo wp_kses_post( $content );
 				wp_reset_postdata();
 				?>
-
-				<!-- Footer: mark-as-read action or read confirmation -->
-				<?php if ( ! $is_read ) : ?>
-					<button
-						class="ia-mark-read-btn"
-						data-post-id="<?php echo esc_attr( $announcement->ID ); ?>"
-						type="button"
-					>
-						<?php esc_html_e( 'Mark as read', 'internal-announcements' ); ?>
-					</button>
-				<?php else : ?>
-					<span class="ia-read-label">
-						<?php esc_html_e( 'Read', 'internal-announcements' ); ?>
-					</span>
-				<?php endif; ?>
 
 			</li>
 			<?php endforeach; ?>
