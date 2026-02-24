@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.3.0] — 2026-02-24
+
+### Added
+
+- **Expiry date** meta field in the **Announcement Options** sidebar box.
+  - Input type `date`, stored as `Y-m-d` in `_expiry_date` post meta.
+  - Date is validated with `DateTimeImmutable::createFromFormat` before saving.
+  - Expired posts are excluded from the feed via a nested `meta_query` (OR: key NOT EXISTS / key is blank / key >= today). Post stays published — no content is deleted.
+  - Admin list table **Expires** column shows the expiry date; expired rows display in red with an "Expired" label. Column is sortable.
+- **Layout setting** — choose between **List** (single column), **Grid — 2 columns**, or **Grid — 3 columns** in **Announcements → Settings**.
+  - Stored as `layout` in plugin options (`list` | `grid-2` | `grid-3`).
+  - Applied as a modifier class (`ia-layout--list`, `ia-layout--grid-2`, `ia-layout--grid-3`) on the feed container.
+  - Grid collapses to 2 columns below 1024 px and to 1 column below 768 px.
+  - `layout` shortcode attribute overrides the setting per placement.
+
+### Changed
+
+- Container `max-width` raised from `800px` to `1200px` to accommodate grid layouts; list layout retains its own `800px` constraint via `.ia-layout--list`.
+- Admin meta box nonce key renamed from `ia_pin_meta_box` / `ia_pin_nonce` to `ia_announcement_meta_box` / `ia_meta_nonce` to reflect the expanded scope of the meta box.
+
+---
+
 ## [1.2.0] — 2026-02-24
 
 ### Added

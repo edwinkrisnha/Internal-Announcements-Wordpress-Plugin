@@ -4,9 +4,14 @@
 
 /* Container */
 .ia-announcements {
-	max-width: 800px;
+	max-width: 1200px;
 	margin: 0 auto;
 	font-family: inherit;
+}
+
+/* List layout — single column, constrained width */
+.ia-layout--list {
+	max-width: 800px;
 }
 
 /* Empty state */
@@ -21,12 +26,48 @@
 }
 
 /* =============================================================================
-   List reset
+   List reset + grid layouts
    ============================================================================= */
 .ia-announcements-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
+}
+
+/* 2-column grid */
+.ia-layout--grid-2 .ia-announcements-list {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+	align-items: start;
+}
+
+/* 3-column grid */
+.ia-layout--grid-3 .ia-announcements-list {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+	align-items: start;
+}
+
+/* In grid mode, cards have no bottom margin (gap handles spacing) */
+.ia-layout--grid-2 .ia-announcement,
+.ia-layout--grid-3 .ia-announcement {
+	margin-bottom: 0;
+}
+
+/* Collapse to single column on narrow viewports */
+@media ( max-width: 768px ) {
+	.ia-layout--grid-2 .ia-announcements-list,
+	.ia-layout--grid-3 .ia-announcements-list {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media ( max-width: 1024px ) {
+	.ia-layout--grid-3 .ia-announcements-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 /* =============================================================================

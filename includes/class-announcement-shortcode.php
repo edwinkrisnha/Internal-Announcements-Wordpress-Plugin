@@ -52,6 +52,7 @@ class Announcement_Shortcode {
 	 *   days     (int)    How many days back to show posts (used when mode = days).
 	 *   new_days (int)    Posts newer than this many days get a "New" badge (0 = off).
 	 *   category (string) Taxonomy slug to filter by. Default '' (all).
+	 *   layout   (string) 'list', 'grid-2', or 'grid-3'. Overrides the saved layout.
 	 */
 	public function render( array $atts ): string {
 		if ( ! is_user_logged_in() ) {
@@ -69,6 +70,7 @@ class Announcement_Shortcode {
 				'days'     => $settings['display_days'],
 				'new_days' => $settings['new_badge_days'],
 				'category' => '',
+				'layout'   => $settings['layout'],
 			),
 			$atts,
 			'announcements'
@@ -79,6 +81,9 @@ class Announcement_Shortcode {
 		$days         = max( 1, (int) $atts['days'] );
 		$new_days     = max( 0, (int) $atts['new_days'] );
 		$category     = sanitize_text_field( $atts['category'] );
+		$layout       = in_array( $atts['layout'], array( 'list', 'grid-2', 'grid-3' ), true )
+			? $atts['layout']
+			: 'list';
 		$new_after_ts = $new_days > 0 ? strtotime( "-{$new_days} days" ) : false;
 
 		// Optional taxonomy filter.
@@ -90,6 +95,27 @@ class Announcement_Shortcode {
 				'terms'    => $category,
 			);
 		}
+
+		// Expiry filter: show posts where _expiry_date is absent, blank, or >= today.
+		$today        = current_time( 'Y-m-d' );
+		$expiry_query = array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_expiry_date',
+				'compare' => 'NOT EXISTS',
+			),
+			array(
+				'key'     => '_expiry_date',
+				'value'   => '',
+				'compare' => '=',
+			),
+			array(
+				'key'     => '_expiry_date',
+				'value'   => $today,
+				'compare' => '>=',
+				'type'    => 'DATE',
+			),
+		);
 
 		$base_args = array(
 			'post_type'              => 'announcement',
@@ -103,23 +129,26 @@ class Announcement_Shortcode {
 			$base_args['tax_query'] = $tax_query;
 		}
 
-		// --- Query 1: pinned (all pinned, always, regardless of display mode) -
+		// --- Query 1: pinned (all pinned that are not expired) ---------------
 		$pinned_query = new WP_Query( array_merge( $base_args, array(
 			'posts_per_page' => -1,
 			'meta_query'     => array(
+				'relation' => 'AND',
 				array(
 					'key'     => '_is_pinned',
 					'value'   => '1',
 					'compare' => '=',
 				),
+				$expiry_query,
 			),
 			'orderby' => 'date',
 			'order'   => 'DESC',
 		) ) );
 
-		// --- Query 2: non-pinned, shaped by display mode ---------------------
-		$non_pinned_args = array_merge( $base_args, array(
-			'meta_query' => array(
+		// --- Query 2: non-pinned (limited by mode, also not expired) ---------
+		$non_pinned_meta = array(
+			'relation' => 'AND',
+			array(
 				'relation' => 'OR',
 				array(
 					'key'     => '_is_pinned',
@@ -131,12 +160,16 @@ class Announcement_Shortcode {
 					'compare' => '!=',
 				),
 			),
-			'orderby' => 'date',
-			'order'   => 'DESC',
+			$expiry_query,
+		);
+
+		$non_pinned_args = array_merge( $base_args, array(
+			'meta_query' => $non_pinned_meta,
+			'orderby'    => 'date',
+			'order'      => 'DESC',
 		) );
 
 		if ( 'days' === $mode ) {
-			// Show everything published within the last $days days.
 			$non_pinned_args['posts_per_page'] = -1;
 			$non_pinned_args['date_query']     = array(
 				array(
@@ -145,7 +178,6 @@ class Announcement_Shortcode {
 				),
 			);
 		} else {
-			// Fixed: show at most $limit posts.
 			$non_pinned_args['posts_per_page'] = $limit;
 		}
 

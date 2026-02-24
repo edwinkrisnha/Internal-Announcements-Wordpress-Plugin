@@ -29,6 +29,7 @@ class Announcement_Settings {
 		'display_limit'  => 10,      // max posts when mode = fixed
 		'display_days'   => 30,      // date range (days back) when mode = days
 		'new_badge_days' => 7,       // posts newer than this get a "New" badge (0 = off)
+		'layout'         => 'list',  // 'list' | 'grid-2' | 'grid-3'
 	);
 
 	// -----------------------------------------------------------------------
@@ -36,8 +37,8 @@ class Announcement_Settings {
 	// -----------------------------------------------------------------------
 
 	public function __construct() {
-		add_action( 'admin_menu',    array( $this, 'register_menu' ) );
-		add_action( 'admin_init',    array( $this, 'register_settings' ) );
+		add_action( 'admin_menu',            array( $this, 'register_menu' ) );
+		add_action( 'admin_init',            array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
@@ -95,6 +96,14 @@ class Announcement_Settings {
 			'ia_display_days',
 			__( 'Days to look back', 'internal-announcements' ),
 			array( $this, 'field_display_days' ),
+			'ia-settings',
+			'ia_section_display'
+		);
+
+		add_settings_field(
+			'ia_layout',
+			__( 'Layout', 'internal-announcements' ),
+			array( $this, 'field_layout' ),
 			'ia-settings',
 			'ia_section_display'
 		);
@@ -193,6 +202,33 @@ class Announcement_Settings {
 		<?php
 	}
 
+	public function field_layout(): void {
+		$settings = self::get();
+		$options  = array(
+			'list'   => __( 'List (single column)', 'internal-announcements' ),
+			'grid-2' => __( 'Grid — 2 columns', 'internal-announcements' ),
+			'grid-3' => __( 'Grid — 3 columns', 'internal-announcements' ),
+		);
+		?>
+		<fieldset>
+			<?php foreach ( $options as $value => $label ) : ?>
+				<label style="display:block;margin-bottom:8px;">
+					<input
+						type="radio"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[layout]"
+						value="<?php echo esc_attr( $value ); ?>"
+						<?php checked( $settings['layout'], $value ); ?>
+					/>
+					<?php echo esc_html( $label ); ?>
+				</label>
+			<?php endforeach; ?>
+		</fieldset>
+		<p class="description">
+			<?php esc_html_e( 'Grid layouts collapse to a single column on small screens. The layout shortcode attribute overrides this setting per placement.', 'internal-announcements' ); ?>
+		</p>
+		<?php
+	}
+
 	public function field_new_badge_days(): void {
 		$settings = self::get();
 		?>
@@ -257,6 +293,10 @@ class Announcement_Settings {
 			$clean['new_badge_days'] = max( 0, min( 365, (int) $input['new_badge_days'] ) );
 		}
 
+		if ( isset( $input['layout'] ) && in_array( $input['layout'], array( 'list', 'grid-2', 'grid-3' ), true ) ) {
+			$clean['layout'] = $input['layout'];
+		}
+
 		return $clean;
 	}
 
@@ -285,7 +325,7 @@ class Announcement_Settings {
 
 		<script>
 		( function () {
-			var radios  = document.querySelectorAll( 'input[name="ia_settings[display_mode]"]' );
+			var radios   = document.querySelectorAll( 'input[name="ia_settings[display_mode]"]' );
 			var rowLimit = document.getElementById( 'ia-field-display-limit' );
 			var rowDays  = document.getElementById( 'ia-field-display-days' );
 
@@ -304,15 +344,14 @@ class Announcement_Settings {
 	}
 
 	// -----------------------------------------------------------------------
-	// Admin assets (only on this plugin's settings page)
+	// Admin assets
 	// -----------------------------------------------------------------------
 
 	public function enqueue_admin_assets( string $hook ): void {
-		// Only load on our settings page.
 		if ( 'announcement_page_ia-settings' !== $hook ) {
 			return;
 		}
-		// Nothing extra needed — the inline <script> in render_page() handles it.
+		// Inline script in render_page() handles all interaction; no extra files needed.
 	}
 
 	// -----------------------------------------------------------------------
@@ -322,7 +361,7 @@ class Announcement_Settings {
 	/**
 	 * Return saved settings merged with defaults.
 	 *
-	 * @return array{display_mode: string, display_limit: int, display_days: int, new_badge_days: int}
+	 * @return array{display_mode: string, display_limit: int, display_days: int, new_badge_days: int, layout: string}
 	 */
 	public static function get(): array {
 		$saved = get_option( self::OPTION_KEY, array() );

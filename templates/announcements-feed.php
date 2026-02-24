@@ -7,13 +7,14 @@
  *   @var WP_Post[] $posts         Merged array — pinned first, then recent.
  *   @var int       $new_days      Posts newer than this many days get a "New" badge.
  *   @var int|false $new_after_ts  Unix timestamp threshold, or false if new_days = 0.
+ *   @var string    $layout        'list', 'grid-2', or 'grid-3'.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="ia-announcements" id="ia-announcements">
+<div class="ia-announcements ia-layout--<?php echo esc_attr( $layout ); ?>" id="ia-announcements">
 
 	<?php if ( empty( $posts ) ) : ?>
 		<p class="ia-no-announcements">

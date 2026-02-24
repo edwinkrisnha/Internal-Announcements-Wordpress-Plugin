@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Internal Announcements
  * Plugin URI:        https://github.com/edwinkrisnha/Internal-Announcements-Wordpress-Plugin
- * Description:       Company announcements / news feed with categories, pinning, "New" badge, and a settings page.
- * Version:           1.2.0
+ * Description:       Company announcements / news feed with categories, pinning, expiry dates, grid layout, and a settings page.
+ * Version:           1.3.0
  * Author:            Edwin Krisnha
  * Author URI:        https://github.com/edwinkrisnha
  * License:           GPLv2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'IA_VERSION',    '1.2.0' );
+define( 'IA_VERSION',    '1.3.0' );
 define( 'IA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'IA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
