@@ -157,3 +157,69 @@
 	line-height: 1.4;
 	color: #1d2327;
 }
+
+/* =============================================================================
+   Category filter tabs
+   (radio inputs are hidden; labels act as clickable tabs)
+   ============================================================================= */
+.ia-filter-radio {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.ia-filter-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 20px;
+}
+
+.ia-filter-tab {
+	display: inline-block;
+	padding: 5px 14px;
+	border-radius: 20px;
+	border: 1px solid #dcdcde;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	background: #fff;
+	color: #50575e;
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	user-select: none;
+}
+
+.ia-filter-tab:hover {
+	border-color: #2271b1;
+	color: #2271b1;
+}
+
+/* "All" tab active state — toggled by :checked on #ia-cat-filter-all */
+#ia-cat-filter-all:checked ~ .ia-filter-tabs label[for="ia-cat-filter-all"] {
+	background: #1d2327;
+	color: #fff;
+	border-color: #1d2327;
+}
+
+/* =============================================================================
+   Author attribution
+   ============================================================================= */
+.ia-author {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.ia-author-avatar {
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.ia-author-name {
+	font-size: 13px;
+	color: #50575e;
+	font-weight: 500;
+}

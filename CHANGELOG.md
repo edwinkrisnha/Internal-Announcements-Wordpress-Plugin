@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.4.0] — 2026-02-24
+
+### Added
+
+- **CSS-only category filter tabs** — when the feed contains 2 or more categories, pill-shaped tab buttons appear above the list. Selecting a category hides non-matching cards instantly with no JavaScript or extra DB queries. Implemented via hidden `<input type="radio">` elements and CSS general sibling combinators. Per-category CSS rules are generated inline by PHP from the terms present in the current feed.
+- **Author attribution** — optional display of the post author's name and Gravatar avatar at the bottom of each card. Controlled by a new **Show author** checkbox in **Announcements → Settings**. Avatar size is 24 px. No extra DB queries (WP caches user data per request).
+- **`show_author` setting** — new boolean in plugin options, default `false`.
+
+### Changed
+
+- **`Announcement_Settings::get()` is now cached** — a `private static array $cache` property stores the merged settings for the duration of each request. `get_option()` is called at most once per request instead of once per `get()` invocation. Cache is cleared at the start of `sanitize()` so a settings save within the same request sees fresh data.
+- **Expiry meta clause extracted to `Announcement_Settings::build_expiry_meta_clause()`** — the shared meta_query array that excludes expired posts is now a single static method, removing the duplication between the pinned and non-pinned queries in the shortcode. Any future query for announcements can call the same helper.
+- **Pre-pass term collection in template** — `get_the_terms()` is now called once per post in a pre-loop pass before rendering, and results are stored in `$post_term_map`. The render loop reads from that map instead of issuing a second `get_the_terms()` call per card.
+
+---
+
 ## [1.3.0] — 2026-02-24
 
 ### Added

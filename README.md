@@ -9,6 +9,8 @@ A WordPress plugin for company intranet announcements / news feeds.
 - **Pinning** — pin any announcement to the top of the feed via a sidebar checkbox; pinned posts always appear first, regardless of date.
 - **"New" badge** — posts published within the last N days (configurable) are automatically labelled **New**; no database tracking required.
 - **Category colors** — each category is automatically assigned a distinct color from a built-in palette; consistent and automatic, no configuration needed.
+- **Category filter tabs** — when 2+ categories appear in the feed, pill-shaped tabs let readers filter by category instantly with no JavaScript or extra queries (CSS-only via radio buttons).
+- **Author attribution** — optionally show the post author's name and avatar on each card (toggleable in Settings).
 - **Expiry date** — optional per-post expiry date; expired announcements are automatically hidden from the feed but remain accessible in the admin.
 - **Flexible layout** — display the feed as a single-column list, 2-column grid, or 3-column grid; configurable globally in settings or per shortcode placement.
 - **Settings page** — configure display mode, post count, date range, badge duration, and layout from **Announcements → Settings**.
@@ -38,6 +40,7 @@ Go to **Announcements → Settings** to configure:
 | Number to show | `10` | Max non-pinned posts (fixed mode only). Pinned posts are always shown. |
 | Days to look back | `30` | Date range for "last X days" mode. |
 | Layout | List | Single-column list, 2-column grid, or 3-column grid. |
+| Show author | Off | Display the post author's name and avatar on each card. |
 | "New" badge duration | `7` | Posts newer than this many days show a **New** badge. `0` disables it. |
 
 ## Usage

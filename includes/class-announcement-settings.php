@@ -30,7 +30,11 @@ class Announcement_Settings {
 		'display_days'   => 30,      // date range (days back) when mode = days
 		'new_badge_days' => 7,       // posts newer than this get a "New" badge (0 = off)
 		'layout'         => 'list',  // 'list' | 'grid-2' | 'grid-3'
+		'show_author'    => false,   // show post author name + avatar on each card
 	);
+
+	/** Per-request option cache — avoids repeated deserialization of the same option. */
+	private static array $cache = array();
 
 	// -----------------------------------------------------------------------
 	// Boot
@@ -104,6 +108,14 @@ class Announcement_Settings {
 			'ia_layout',
 			__( 'Layout', 'internal-announcements' ),
 			array( $this, 'field_layout' ),
+			'ia-settings',
+			'ia_section_display'
+		);
+
+		add_settings_field(
+			'ia_show_author',
+			__( 'Show author', 'internal-announcements' ),
+			array( $this, 'field_show_author' ),
 			'ia-settings',
 			'ia_section_display'
 		);
@@ -229,6 +241,24 @@ class Announcement_Settings {
 		<?php
 	}
 
+	public function field_show_author(): void {
+		$settings = self::get();
+		?>
+		<label>
+			<input
+				type="checkbox"
+				name="<?php echo esc_attr( self::OPTION_KEY ); ?>[show_author]"
+				value="1"
+				<?php checked( $settings['show_author'] ); ?>
+			/>
+			<?php esc_html_e( 'Display the author\'s name and avatar on each announcement card', 'internal-announcements' ); ?>
+		</label>
+		<p class="description">
+			<?php esc_html_e( 'Uses the WordPress display name and Gravatar. If your intranet has no external internet access, disable Gravatar in Settings → Discussion instead.', 'internal-announcements' ); ?>
+		</p>
+		<?php
+	}
+
 	public function field_new_badge_days(): void {
 		$settings = self::get();
 		?>
@@ -275,7 +305,10 @@ class Announcement_Settings {
 	// -----------------------------------------------------------------------
 
 	public function sanitize( mixed $input ): array {
-		$clean = self::get(); // start from current saved values as fallback.
+		// Clear the request cache so any get() calls after this save see fresh DB data.
+		self::$cache = array();
+
+		$clean = self::get(); // reads current saved values as sanitize fallback.
 
 		if ( isset( $input['display_mode'] ) && in_array( $input['display_mode'], array( 'fixed', 'days' ), true ) ) {
 			$clean['display_mode'] = $input['display_mode'];
@@ -296,6 +329,9 @@ class Announcement_Settings {
 		if ( isset( $input['layout'] ) && in_array( $input['layout'], array( 'list', 'grid-2', 'grid-3' ), true ) ) {
 			$clean['layout'] = $input['layout'];
 		}
+
+		// Checkbox: present = true, absent = false.
+		$clean['show_author'] = ! empty( $input['show_author'] );
 
 		return $clean;
 	}
@@ -361,11 +397,50 @@ class Announcement_Settings {
 	/**
 	 * Return saved settings merged with defaults.
 	 *
-	 * @return array{display_mode: string, display_limit: int, display_days: int, new_badge_days: int, layout: string}
+	 * Results are cached in a static property for the duration of the request
+	 * so get_option() is only deserialized once per request.
+	 *
+	 * @return array{display_mode: string, display_limit: int, display_days: int, new_badge_days: int, layout: string, show_author: bool}
 	 */
 	public static function get(): array {
-		$saved = get_option( self::OPTION_KEY, array() );
-		return array_merge( self::DEFAULTS, is_array( $saved ) ? $saved : array() );
+		if ( empty( self::$cache ) ) {
+			$saved       = get_option( self::OPTION_KEY, array() );
+			self::$cache = array_merge( self::DEFAULTS, is_array( $saved ) ? $saved : array() );
+		}
+
+		return self::$cache;
+	}
+
+	/**
+	 * Build the meta_query clause that excludes expired announcements.
+	 *
+	 * Shows a post when its _expiry_date:
+	 *   - does not exist (no expiry set), OR
+	 *   - is an empty string (explicitly cleared), OR
+	 *   - is >= today's date (still active).
+	 *
+	 * Extracted as a shared helper so any query for announcements can apply
+	 * the same expiry logic without duplicating the clause.
+	 */
+	public static function build_expiry_meta_clause(): array {
+		return array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_expiry_date',
+				'compare' => 'NOT EXISTS',
+			),
+			array(
+				'key'     => '_expiry_date',
+				'value'   => '',
+				'compare' => '=',
+			),
+			array(
+				'key'     => '_expiry_date',
+				'value'   => current_time( 'Y-m-d' ),
+				'compare' => '>=',
+				'type'    => 'DATE',
+			),
+		);
 	}
 
 	/**

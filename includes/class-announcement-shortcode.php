@@ -85,8 +85,9 @@ class Announcement_Shortcode {
 			? $atts['layout']
 			: 'list';
 		$new_after_ts = $new_days > 0 ? strtotime( "-{$new_days} days" ) : false;
+		$show_author  = (bool) $settings['show_author'];
 
-		// Optional taxonomy filter.
+		// Optional taxonomy filter (pre-filter via shortcode attribute).
 		$tax_query = array();
 		if ( $category ) {
 			$tax_query[] = array(
@@ -96,26 +97,8 @@ class Announcement_Shortcode {
 			);
 		}
 
-		// Expiry filter: show posts where _expiry_date is absent, blank, or >= today.
-		$today        = current_time( 'Y-m-d' );
-		$expiry_query = array(
-			'relation' => 'OR',
-			array(
-				'key'     => '_expiry_date',
-				'compare' => 'NOT EXISTS',
-			),
-			array(
-				'key'     => '_expiry_date',
-				'value'   => '',
-				'compare' => '=',
-			),
-			array(
-				'key'     => '_expiry_date',
-				'value'   => $today,
-				'compare' => '>=',
-				'type'    => 'DATE',
-			),
-		);
+		// Shared expiry clause — excludes posts whose _expiry_date has passed.
+		$expiry_query = Announcement_Settings::build_expiry_meta_clause();
 
 		$base_args = array(
 			'post_type'              => 'announcement',
@@ -146,27 +129,25 @@ class Announcement_Shortcode {
 		) ) );
 
 		// --- Query 2: non-pinned (limited by mode, also not expired) ---------
-		$non_pinned_meta = array(
-			'relation' => 'AND',
-			array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_is_pinned',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => '_is_pinned',
-					'value'   => '1',
-					'compare' => '!=',
-				),
-			),
-			$expiry_query,
-		);
-
 		$non_pinned_args = array_merge( $base_args, array(
-			'meta_query' => $non_pinned_meta,
-			'orderby'    => 'date',
-			'order'      => 'DESC',
+			'meta_query' => array(
+				'relation' => 'AND',
+				array(
+					'relation' => 'OR',
+					array(
+						'key'     => '_is_pinned',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => '_is_pinned',
+						'value'   => '1',
+						'compare' => '!=',
+					),
+				),
+				$expiry_query,
+			),
+			'orderby' => 'date',
+			'order'   => 'DESC',
 		) );
 
 		if ( 'days' === $mode ) {
