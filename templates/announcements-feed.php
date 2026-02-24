@@ -54,9 +54,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php endif; ?>
 
 					<?php if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) : ?>
-						<span class="ia-category">
-							<?php echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) ); ?>
-						</span>
+						<?php foreach ( $terms as $term ) : ?>
+							<span
+								class="ia-category"
+								style="<?php echo esc_attr( Announcement_Settings::get_category_inline_style( $term->term_id ) ); ?>"
+							>
+								<?php echo esc_html( $term->name ); ?>
+							</span>
+						<?php endforeach; ?>
 					<?php endif; ?>
 
 					<time

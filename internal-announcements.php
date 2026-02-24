@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Internal Announcements
  * Plugin URI:        https://github.com/edwinkrisnha/Internal-Announcements-Wordpress-Plugin
- * Description:       Company announcements / news feed with categories, pinning, and a "New" badge for recent posts.
- * Version:           1.1.0
+ * Description:       Company announcements / news feed with categories, pinning, "New" badge, and a settings page.
+ * Version:           1.2.0
  * Author:            Edwin Krisnha
  * Author URI:        https://github.com/edwinkrisnha
  * License:           GPLv2 or later
@@ -17,11 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'IA_VERSION',    '1.1.0' );
+define( 'IA_VERSION',    '1.2.0' );
 define( 'IA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'IA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 require_once IA_PLUGIN_DIR . 'includes/class-announcement-cpt.php';
+require_once IA_PLUGIN_DIR . 'includes/class-announcement-settings.php';
 require_once IA_PLUGIN_DIR . 'includes/class-announcement-shortcode.php';
 require_once IA_PLUGIN_DIR . 'includes/class-announcement-admin.php';
 
@@ -44,6 +45,7 @@ function ia_activate(): void {
 add_action( 'init', array( 'Announcement_CPT', 'register' ) );
 
 add_action( 'plugins_loaded', function (): void {
+	new Announcement_Settings();
 	new Announcement_Shortcode();
 	new Announcement_Admin();
 } );

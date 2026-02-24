@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] — 2026-02-24
+
+### Added
+
+- **Settings page** under **Announcements → Settings** (WP Settings API).
+  - **Display mode**: choose between "Fixed number" (max N posts) or "Last X days" (all posts in a date window).
+  - **"New" badge duration**: control the badge threshold globally without editing shortcodes.
+  - **Category color preview**: the settings page shows each category with its auto-assigned color swatch.
+- **Automatic category colors**: each `announcement_category` term is assigned a distinct color from an 8-color palette, derived from its term ID. Colors are output as inline styles — no extra CSS or database storage required.
+- **`mode` and `days` shortcode attributes**: shortcode attributes now override saved settings per placement; `mode="fixed"` or `mode="days"` selects the display mode, `days="30"` sets the date window.
+- Date-based display query (`date_query`) for the "last X days" feed mode.
+
+### Changed
+
+- Shortcode defaults now read from **Announcements → Settings** instead of hardcoded values; explicit shortcode attributes still override them.
+
+---
+
 ## [1.1.0] — 2026-02-24
 
 ### Changed
