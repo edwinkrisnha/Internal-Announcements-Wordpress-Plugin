@@ -1,0 +1,159 @@
+/* =============================================================================
+   Internal Announcements — Feed Styles
+   ============================================================================= */
+
+/* Container */
+.ia-announcements {
+	max-width: 800px;
+	margin: 0 auto;
+	font-family: inherit;
+}
+
+/* Unread summary banner */
+.ia-unread-summary {
+	background: #eaf4fb;
+	border-left: 4px solid #2271b1;
+	padding: 10px 14px;
+	border-radius: 3px;
+	margin-bottom: 24px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Empty state */
+.ia-no-announcements {
+	color: #757575;
+	font-style: italic;
+}
+
+/* Login notice */
+.ia-login-notice {
+	color: #757575;
+}
+
+/* =============================================================================
+   List reset
+   ============================================================================= */
+.ia-announcements-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* =============================================================================
+   Announcement card
+   ============================================================================= */
+.ia-announcement {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin-bottom: 16px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Unread: accent left border + subtle shadow */
+.ia-announcement.ia-unread {
+	border-left: 4px solid #2271b1;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Pinned: slightly elevated background */
+.ia-announcement.ia-pinned {
+	background: #f9f9f9;
+}
+
+/* =============================================================================
+   Header row: badges + date
+   ============================================================================= */
+.ia-announcement-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+
+/* "Pinned" badge */
+.ia-pin-badge {
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 2px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* Unread blue dot */
+.ia-unread-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	background: #2271b1;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* Category label */
+.ia-category {
+	background: #f6f7f7;
+	color: #50575e;
+	font-size: 12px;
+	padding: 2px 8px;
+	border-radius: 2px;
+}
+
+/* Date — pushed to the right */
+.ia-date {
+	margin-left: auto;
+	color: #9ca3af;
+	font-size: 13px;
+	white-space: nowrap;
+}
+
+/* =============================================================================
+   Title
+   ============================================================================= */
+.ia-announcement-title {
+	margin: 0 0 12px;
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #1d2327;
+}
+
+/* =============================================================================
+   Footer actions
+   ============================================================================= */
+.ia-mark-read-btn {
+	display: inline-block;
+	margin-top: 16px;
+	padding: 6px 14px;
+	background: transparent;
+	border: 1px solid #2271b1;
+	border-radius: 3px;
+	color: #2271b1;
+	font-size: 13px;
+	line-height: 1.5;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ia-mark-read-btn:hover:not(:disabled) {
+	background: #2271b1;
+	color: #fff;
+}
+
+.ia-mark-read-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.ia-read-label {
+	display: inline-block;
+	margin-top: 16px;
+	color: #9ca3af;
+	font-size: 13px;
+}
